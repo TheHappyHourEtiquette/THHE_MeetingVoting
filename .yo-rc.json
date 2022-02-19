@@ -1,0 +1,9 @@
+{
+  "generator-teams": {
+    "promptValues": {
+      "developer": "Kevin McDonnell"
+    },
+    "libraryName": "thheMeetingVotingTest",
+    "generator-version": "3.5.0"
+  }
+}

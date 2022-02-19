@@ -1,0 +1,57 @@
+{
+  "$schema": "https://raw.githubusercontent.com/OfficeDev/microsoft-teams-app-schema/preview/DevPreview/MicrosoftTeams.schema.json",
+  "manifestVersion": "devPreview",
+  "id": "2f179ae0-6b4e-11ec-8380-271290559d8c",
+  "version": "0.0.5",
+  "packageName": "v2thhemeetingvotingtest",
+  "developer": {
+    "name": "Kevin McDonnell",
+    "websiteUrl": "https://thhemeetingvotingtest.azurewebsites.net",
+    "privacyUrl": "https://thhemeetingvotingtest.azurewebsites.net/privacy.html",
+    "termsOfUseUrl": "https://thhemeetingvotingtest.azurewebsites.net/tou.html"
+  },
+  "name": {
+    "short": "THHE_MeetingVotingTest",
+    "full": "THHE_MeetingVotingTest"
+  },
+  "description": {
+    "short": "TODO: add short description here",
+    "full": "TODO: add full description here"
+  },
+  "icons": {
+    "outline": "icon-outline.png",
+    "color": "icon-color.png"
+  },
+  "accentColor": "#D85028",
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://thhemeetingvotingtest.azurewebsites.net/meetingVotingTab/config.html?name={loginHint}&tenant={tid}&group={groupId}&theme={theme}",
+      "canUpdateConfiguration": true,
+      "scopes": [
+        "groupchat"
+      ],
+      "meetingSurfaces": [
+        "sidePanel"
+      ],
+      "context":[
+        "meetingSidePanel"
+     ]
+    }
+  ],
+  "staticTabs": [],
+  "bots": [],
+  "connectors": [],
+  "composeExtensions": [],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "thhemeetingvotingtest.azurewebsites.net"
+  ],
+  "showLoadingIndicator": true,
+  "webApplicationInfo": {
+    "id": "1c55d1bf-faaa-4367-ab5c-2c5feda1febf",
+    "resource": "api://thhemeetingvotingtest.azurewebsites.net/1c55d1bf-faaa-4367-ab5c-2c5feda1febf"
+  }
+}
