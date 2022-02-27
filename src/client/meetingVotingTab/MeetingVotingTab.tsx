@@ -1,10 +1,13 @@
 import * as React from "react";
 import { Provider, Flex, Text, Button, Header } from "@fluentui/react-northstar";
 import { useState, useEffect } from "react";
+import { useQuery } from "react-query";
 import { useTeams } from "msteams-react-base-component";
 import * as microsoftTeams from "@microsoft/teams-js";
 import jwtDecode from "jwt-decode";
 import { MeetingVotingShowHeader } from "./MeetingVotingShowHeader";
+import Axios from "axios";
+import { IShow } from "../../interfaces/IShow";
 
 /**
  * Implementation of the Meeting Voting content page
@@ -13,6 +16,7 @@ export const MeetingVotingTab = () => {
 
     const [{ inTeams, theme, context }] = useTeams();
     const [entityId, setEntityId] = useState<string | undefined>();
+    const [shows, setShows] = useState<IShow>();
     const [name, setName] = useState<string>();
     const [error, setError] = useState<string>();
 
@@ -38,11 +42,19 @@ export const MeetingVotingTab = () => {
         }
     }, [inTeams]);
 
+    const fetchShows = async () => {
+        console.log("Getting shows");
+        // const response = await Axios.get<IShow>(`http://${process.env.PUBLIC_HOSTNAME}/api/shows`, {});
+        const response = await fetch(`http://${process.env.PUBLIC_HOSTNAME}/api/shows`);
+        return response.json();
+    };
+
+    const { data, status } = useQuery<IShow>("shows", fetchShows, {
+        staleTime: 5000
+    });
     useEffect(() => {
-        if (context) {
-            setEntityId(context.entityId);
-        }
-    }, [context]);
+        setShows(data ?? []);
+    }, [data]);
 
     /**
      * The render() method to create the UI of the tab
@@ -58,7 +70,9 @@ export const MeetingVotingTab = () => {
                     <div className="agendaSubTitle">@Model.Title</div>
                 </Flex.Item>
                 <Flex.Item>
-                    <div className="agendaSubTitle">Your panellists today:</div>
+                    <div>
+                        {shows}
+                    </div>
                 </Flex.Item>
                 <Flex.Item>
                     <div id="list">

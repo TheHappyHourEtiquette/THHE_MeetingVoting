@@ -6,9 +6,9 @@
   "packageName": "v2thhemeetingvotingtest",
   "developer": {
     "name": "Kevin McDonnell",
-    "websiteUrl": "https://thhemeetingvotingtest.azurewebsites.net",
-    "privacyUrl": "https://thhemeetingvotingtest.azurewebsites.net/privacy.html",
-    "termsOfUseUrl": "https://thhemeetingvotingtest.azurewebsites.net/tou.html"
+    "websiteUrl": "https://localhost:3007",
+    "privacyUrl": "https://localhost:3007/privacy.html",
+    "termsOfUseUrl": "https://localhost:3007/tou.html"
   },
   "name": {
     "short": "THHE_MeetingVotingTest",
@@ -25,7 +25,7 @@
   "accentColor": "#D85028",
   "configurableTabs": [
     {
-      "configurationUrl": "https://thhemeetingvotingtest.azurewebsites.net/meetingVotingTab/config.html?name={loginHint}&tenant={tid}&group={groupId}&theme={theme}",
+      "configurationUrl": "https://localhost:3007/meetingVotingTab/config.html?name={loginHint}&tenant={tid}&group={groupId}&theme={theme}",
       "canUpdateConfiguration": true,
       "scopes": [
         "groupchat"
@@ -47,11 +47,11 @@
     "messageTeamMembers"
   ],
   "validDomains": [
-    "thhemeetingvotingtest.azurewebsites.net"
+    "localhost:3007"
   ],
   "showLoadingIndicator": true,
   "webApplicationInfo": {
     "id": "1c55d1bf-faaa-4367-ab5c-2c5feda1febf",
-    "resource": "api://thhemeetingvotingtest.azurewebsites.net/1c55d1bf-faaa-4367-ab5c-2c5feda1febf"
+    "resource": "api://localhost:3007/1c55d1bf-faaa-4367-ab5c-2c5feda1febf"
   }
 }

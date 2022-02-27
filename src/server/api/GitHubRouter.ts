@@ -1,27 +1,32 @@
 import express = require("express");
 // import jwt, { JwtHeader, SigningKeyCallback } from "jsonwebtoken";
-import { Jwt, JwtHeader, SigningKeyCallback } from "jsonwebtoken";
-import { JwksClient } from "jwks-rsa";
-import { ClientCredentialRequest, ConfidentialClientApplication, OnBehalfOfRequest } from "@azure/msal-node";
+import { AppAuthentication, createOAuthAppAuth } from "@octokit/auth-oauth-app";
 import Axios from "axios";
 import { Chat } from "@microsoft/microsoft-graph-types";
 import { getItem, setItem } from "node-persist";
 import jwtDecode from "jwt-decode";
 import { IShow } from "../../interfaces/IShow";
+import { Octokit } from "@octokit/rest";
+import { IPanellist } from "../../interfaces/IPanellist";
+import { IQuestion } from "../../interfaces/IQuestion";
+import { IDefendTheIndefensible } from "../../interfaces/IDefendTheIndefensible";
 
-export const GraphRouter = (options: any): express.Router => {
+export const GitHubRouter = (options: any): express.Router => {
     const router = express.Router();
 
-    /**
-     * Token Validation Code Credits go to Elio Struyf
-     * https://www.eliostruyf.com/oauth-behalf-flow-node-js-azure-functions/
-     */
-    const msalConfig = {
-        auth: {
-            clientId: process.env.TAB_APP_ID as string,
-            clientSecret: process.env.TAB_APP_SECRET,
-            authority: process.env.TAB_AUTHORITY
-        }
+    const validateToken = (req: express.Request): Promise<AppAuthentication> => {
+        return new Promise((resolve, reject) => {
+            console.log(process.env.GITHUB_APP_ID );
+            const auth = createOAuthAppAuth({
+                clientType: "oauth-app",
+                clientId: process.env.GITHUB_APP_ID as string,
+                clientSecret: process.env.GITHUB_APP_SECRET as string
+            });
+
+            return auth({
+                type: "oauth-app"
+            });
+        });
     };
     /*
     const getSigningKeys = (header: JwtHeader, callback: SigningKeyCallback) => {
@@ -71,10 +76,42 @@ export const GraphRouter = (options: any): express.Router => {
         "/shows",
         async (req: express.Request, res: express.Response, next: express.NextFunction) => {
             try {
-                const chatInfo = await Axios.get<IShow[]>("https://api.github.com/repos/TheHappyHourEtiquette/THHE-Shows/contents/shows", {});
+                console.log("retrieving token details");
+                const octokit = new Octokit({
+                    // authStrategy: validateToken
+                    auth: "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"
+                });
+                console.log("retrieving data");
+                const { data } = await octokit.request("/repos/TheHappyHourEtiquette/THHE-Shows/contents/shows");
+                // const chatInfo = await Axios.get<IShow[]>("https://api.github.com/repos/TheHappyHourEtiquette/THHE-Shows/contents/shows", {});
+                console.log("data received");
+                const shows: IShow[] = [];
+                data.forEach((showData:any) => {
+                    const panellist: IPanellist = {
+                        Title: "Test",
+                        ImageUrl: "",
+                        TotalScore: 0
+                    };
+                    const panellists: IPanellist[] = [];
+                    panellists.push(panellist);
+                    const questions: IQuestion[] = [];
+                    const indefensibles: IDefendTheIndefensible[] = [];
+
+                    const show: IShow = {
+                        Title: showData.name
+                        /* ,
+                        Host: panellist,
+                        Panellists: panellists,
+                        Questions: questions,
+                        DefendTheIndefensibles: indefensibles
+                        */
+                    };
+                    shows.push(show);
+                });
                 res.type("application/json");
-                res.end(JSON.stringify(chatInfo?.data));
+                res.end(JSON.stringify(shows[0]));
             } catch (err) {
+                console.log(err);
                 throw new Error("500");
             }
         });

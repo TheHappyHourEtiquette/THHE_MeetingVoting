@@ -5,6 +5,7 @@ import * as morgan from "morgan";
 import { MsTeamsApiRouter, MsTeamsPageRouter } from "express-msteams-host";
 import * as debug from "debug";
 import * as compression from "compression";
+import { GitHubRouter } from "./api/GitHubRouter";
 
 // Initialize debug logging module
 const log = debug("msteams");
@@ -58,6 +59,8 @@ express.use(MsTeamsPageRouter({
 express.use("/", Express.static(path.join(__dirname, "web/"), {
     index: "index.html"
 }));
+
+express.use("/api", GitHubRouter({}));
 
 // Set the port
 express.set("port", port);
