@@ -5,6 +5,7 @@ import Axios from "axios";
 import { Chat } from "@microsoft/microsoft-graph-types";
 import { getItem, setItem } from "node-persist";
 import jwtDecode from "jwt-decode";
+import * as GreyMatter from "gray-matter";
 import { IShow } from "../../interfaces/IShow";
 import { Octokit } from "@octokit/rest";
 import { IPanellist } from "../../interfaces/IPanellist";
@@ -16,7 +17,7 @@ export const GitHubRouter = (options: any): express.Router => {
 
     const validateToken = (req: express.Request): Promise<AppAuthentication> => {
         return new Promise((resolve, reject) => {
-            console.log(process.env.GITHUB_APP_ID );
+            // console.log(process.env.GITHUB_APP_ID );
             const auth = createOAuthAppAuth({
                 clientType: "oauth-app",
                 clientId: process.env.GITHUB_APP_ID as string,
@@ -28,88 +29,99 @@ export const GitHubRouter = (options: any): express.Router => {
             });
         });
     };
-    /*
-    const getSigningKeys = (header: JwtHeader, callback: SigningKeyCallback) => {
-        const client = new JwksClient({
-            jwksUri: "https://login.microsoftonline.com/common/discovery/keys"
+
+    async function asyncForEach(array, callback) {
+        for (let index = 0; index < array.length; index++) {
+            await callback(array[index], index, array);
+        }
+    }
+
+    async function loadShows():Promise<IShow[]> {
+        console.log("Load shows");
+        const shows: IShow[] = [];
+
+        const octokit = new Octokit({
+            // authStrategy: validateToken
+            auth: process.env.GITHUB_TOKEN as string
         });
+        const { data } = await octokit.request("/repos/TheHappyHourEtiquette/THHE-Shows/contents/shows");
+        // const chatInfo = await Axios.get<IShow[]>("https://api.github.com/repos/TheHappyHourEtiquette/THHE-Shows/contents/shows", {});
+        // console.log("data received");
+        const panellist: IPanellist = {
+            Title: "Test host",
+            ImageUrl: "",
+            TotalScore: 0
+        };
+        const panellists: IPanellist[] = [];
+        panellists.push(panellist);
+        const questions: IQuestion[] = [];
+        const indefensibles: IDefendTheIndefensible[] = [];
 
-        client.getSigningKey(header.kid, function (err, key: any) {
-            callback(err, key.publicKey || key.rsaPublicKey); // eslint-disable-line node/handle-callback-err
-        });
-    };
+        const show: IShow = {
+            Title: "test",
+            Host: panellist,
+            Panellists: panellists,
+            Questions: questions,
+            DefendTheIndefensibles: indefensibles
+        };
+        // console.log("pushing shows");
+        // console.log(show);
+        // shows.push(show);
 
-    const validateToken = (req: express.Request): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const authHeader = req.headers.authorization;
-            if (authHeader) {
-                const token = authHeader.split(" ").pop();
+        for (const showData of data) {
+            // console.log("loading show " + showData.name);
+            const showPath = `shows/${showData.name}`;
+            const showContents = await octokit.repos.getContent({
+                mediaType: {
+                    format: "raw"
+                },
+                owner: "TheHappyHourEtiquette",
+                repo: "THHE-Shows",
+                path: showPath
+            });
+            // console.log("show loaded");
+            // console.log(showContents);
+            const showDetails = GreyMatter(showContents.data.toString());
 
-                if (token) {
-                    const validationOptions = {
-                        audience: `api://${process.env.PUBLIC_HOSTNAME}/${process.env.TAB_APP_ID}`
-                    };
+            const panellist: IPanellist = {
+                Title: showDetails.data.host,
+                ImageUrl: "",
+                TotalScore: 0
+            };
+            const panellists: IPanellist[] = [];
+            panellists.push(panellist);
+            const questions: IQuestion[] = [];
+            const indefensibles: IDefendTheIndefensible[] = [];
 
-                    jwt.verify(token, getSigningKeys, validationOptions, (err, payload) => {
-                        if (err) {
+            // console.log(showDetails.data.title);
+            const show: IShow = {
+                Title: showData.name,
+                Host: panellist,
+                Panellists: panellists,
+                Questions: questions,
+                DefendTheIndefensibles: indefensibles
+            };
+            // console.log("pushing shows");
+            // console.log(show);
+            shows.push(show);
+        };
 
-                            reject(new Error("403"));
-                            return;
-                        }
-
-                        resolve(token);
-                    });
-                } else {
-                    reject(new Error("401"));
-                }
-            } else {
-                reject(new Error("401"));
-            }
-        });
-    };
-    */
-    /**
-     * End: Token Validation Code
-     */
+        return shows;
+    }
 
     router.get(
         "/shows",
         async (req: express.Request, res: express.Response, next: express.NextFunction) => {
             try {
-                console.log("retrieving token details");
-                const octokit = new Octokit({
-                    // authStrategy: validateToken
-                    auth: "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"
-                });
-                console.log("retrieving data");
-                const { data } = await octokit.request("/repos/TheHappyHourEtiquette/THHE-Shows/contents/shows");
-                // const chatInfo = await Axios.get<IShow[]>("https://api.github.com/repos/TheHappyHourEtiquette/THHE-Shows/contents/shows", {});
-                console.log("data received");
-                const shows: IShow[] = [];
-                data.forEach((showData:any) => {
-                    const panellist: IPanellist = {
-                        Title: "Test",
-                        ImageUrl: "",
-                        TotalScore: 0
-                    };
-                    const panellists: IPanellist[] = [];
-                    panellists.push(panellist);
-                    const questions: IQuestion[] = [];
-                    const indefensibles: IDefendTheIndefensible[] = [];
-
-                    const show: IShow = {
-                        Title: showData.name
-                        /* ,
-                        Host: panellist,
-                        Panellists: panellists,
-                        Questions: questions,
-                        DefendTheIndefensibles: indefensibles
-                        */
-                    };
-                    shows.push(show);
-                });
+                // console.log("retrieving token details");
+                // console.log("retrieving data");
+                const shows: IShow[] = await loadShows();
                 res.type("application/json");
-                res.end(JSON.stringify(shows[0]));
+                // console.log(shows);
+                // TODO: identify why results not being returned to API
+                // console.log(JSON.stringify(shows));
+                res.end(JSON.stringify(shows));
+                // res.end(shows);
             } catch (err) {
                 console.log(err);
                 throw new Error("500");

@@ -1,11 +1,12 @@
 import * as React from "react";
 import { Provider, Flex, Text, Button, Header } from "@fluentui/react-northstar";
 import { useState, useEffect } from "react";
-import { useQuery } from "react-query";
+import { useQuery, QueryClient, QueryClientProvider } from "react-query";
 import { useTeams } from "msteams-react-base-component";
 import * as microsoftTeams from "@microsoft/teams-js";
 import jwtDecode from "jwt-decode";
 import { MeetingVotingShowHeader } from "./MeetingVotingShowHeader";
+import { GitShows } from "../common/GitShows";
 import Axios from "axios";
 import { IShow } from "../../interfaces/IShow";
 
@@ -42,23 +43,17 @@ export const MeetingVotingTab = () => {
         }
     }, [inTeams]);
 
-    const fetchShows = async () => {
-        console.log("Getting shows");
-        // const response = await Axios.get<IShow>(`http://${process.env.PUBLIC_HOSTNAME}/api/shows`, {});
-        const response = await fetch(`http://${process.env.PUBLIC_HOSTNAME}/api/shows`);
-        return response.json();
-    };
-
-    const { data, status } = useQuery<IShow>("shows", fetchShows, {
-        staleTime: 5000
-    });
-    useEffect(() => {
-        setShows(data ?? []);
-    }, [data]);
-
-    /**
-     * The render() method to create the UI of the tab
-     */
+    const queryClient = new QueryClient();
+    /*
+    const queryInfo = useQuery("shows", () => Axios
+        .get<IShow[]>(`http://${process.env.PUBLIC_HOSTNAME}/api/shows`)
+        .then(res => res.data));
+    */
+    /*
+    {queryInfo.data?.map(result => {
+                                return <div key={result.Title}>{result.Title}</div>;
+                            })}
+    */
     return (
         <Provider theme={theme}>
             <Flex fill={true} column styles={{
@@ -66,18 +61,13 @@ export const MeetingVotingTab = () => {
                 backgroundColor: "black"
             }}>
                 <MeetingVotingShowHeader />
-                <Flex.Item>
-                    <div className="agendaSubTitle">@Model.Title</div>
-                </Flex.Item>
-                <Flex.Item>
-                    <div>
-                        {shows}
-                    </div>
-                </Flex.Item>
-                <Flex.Item>
-                    <div id="list">
-                        Panellist name
-                    </div>
+                <Flex.Item className="showInfo">
+                    <QueryClientProvider client={queryClient}>
+                        <div>
+                            <div className="agendaSubTitle">Shows</div>
+                            <GitShows />
+                        </div>
+                    </QueryClientProvider>
                 </Flex.Item>
                 <Flex.Item>
                     <div className="agendaSubTitle">Rounds:</div>
